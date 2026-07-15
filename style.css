@@ -1,81 +1,203 @@
-body{
+*{
     margin:0;
     padding:0;
-    font-family:Arial, Helvetica, sans-serif;
-    background:linear-gradient(135deg,#06a5e3af,#d8694a);
+    box-sizing:border-box;
+}
+
+body{
     height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
+    /* Use a soft pink-to-pink gradient to avoid a white-looking bottom strip */
+    background:linear-gradient(135deg,#ffe5ec 0%, #ffd1e0 100%);
+    font-family:'Segoe UI',sans-serif;
+    overflow:hidden;
+    position:relative;
 }
 
-.container{
-    position: relative;
-    width: 420px;
-    height: 380px;
-    background: #fff;
-    transform: rotate(-45deg);
-    margin: 80px auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+/* Floating Background */
+
+.background-animation{
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    z-index:0;
+    overflow:hidden;
 }
 
-.container::before,
-.container::after{
-    content: "";
-    position: absolute;
-    width: 420px;
-    height: 380px;
-    background: #fff;
-    border-radius: 50%;
+.heart,
+.gift{
+    position:absolute;
+    bottom:-100px;
+    font-size:20px;
+    opacity:.8;
+    animation:floatUp linear infinite;
 }
 
-.container::before{
-    top: -210px;
-    left: 0;
+/* Hearts */
+
+.heart:nth-child(1){left:5%;animation:12s floatUp infinite;}
+.heart:nth-child(2){left:20%;animation:10s floatUp infinite 2s;}
+.heart:nth-child(3){left:38%;animation:13s floatUp infinite 4s;}
+.heart:nth-child(4){left:58%;animation:11s floatUp infinite 1s;}
+.heart:nth-child(5){left:78%;animation:14s floatUp infinite 3s;}
+.heart:nth-child(6){left:92%;animation:12s floatUp infinite 5s;}
+
+/* Gifts */
+
+.gift:nth-child(7){left:15%;animation:15s floatUp infinite;}
+.gift:nth-child(8){left:42%;animation:18s floatUp infinite 2s;}
+.gift:nth-child(9){left:70%;animation:17s floatUp infinite 5s;}
+.gift:nth-child(10){left:88%;animation:16s floatUp infinite 3s;}
+
+@keyframes floatUp{
+
+0%{
+transform:translateY(0) rotate(0deg);
+opacity:0;
 }
 
-.container::after{
-    left: 210px;
-    top: 0;
+10%{
+opacity:1;
+}
+
+90%{
+opacity:1;
+}
+
+100%{
+transform:translateY(-120vh) rotate(360deg);
+opacity:0;
+}
+
+}
+
+/* Sparkles */
+
+.sparkle{
+position:absolute;
+font-size:24px;
+animation:twinkle 2s infinite alternate;
+z-index:0;
+}
+
+.s1{
+top:10%;
+left:12%;
+}
+
+.s2{
+top:20%;
+right:12%;
+}
+
+.s3{
+bottom:18%;
+left:18%;
+}
+
+.s4{
+bottom:15%;
+right:15%;
+}
+
+@keyframes twinkle{
+
+from{
+opacity:.3;
+transform:scale(.8);
+}
+
+to{
+opacity:1;
+transform:scale(1.3);
+}
+
+}
+
+/* Heart Card */
+
+.heart-card{
+
+width:700px;
+height:700px;
+background:#e91e63;
+
+clip-path:path("M350 650 L90 350 C-40 170 130 -30 350 150 C570 -30 740 170 610 350 Z");
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+position:relative;
+z-index:2;
+
+animation:beat 2s infinite;
+
+box-shadow:0 25px 60px rgba(233,30,99,.45);
+
+}
+
+/* Content */
+
+.content{
+
+width:80%;
+text-align:center;
+color:white;
+padding-top:60px;
+
 }
 
 h1{
-    color:#0ba4b5;
-    font-size:42px;
+
+font-size:26px;
+line-height:1.4;
+margin-bottom:20px;
+text-shadow:2px 2px 10px rgba(0,0,0,.25);
+
 }
 
 p{
-    font-size:20px;
-    color:#e60a45a9;
-    line-height:1.6;
+
+font-size:16px;
+line-height:1.5;
+margin-bottom:10px;
+
 }
 
 button{
-    margin-top:25px;
-    background:#ff3366;
-    color:white;
-    border:none;
-    padding:15px 30px;
-    font-size:20px;
-    border-radius:30px;
-    cursor:pointer;
-    transition:.3s;
+
+background:white;
+color:#e91e63;
+border:none;
+padding:10px 30px;
+border-radius:20px;
+font-size:10px;
+font-weight:bold;
+cursor:pointer;
+transition:.3s;
+
 }
 
 button:hover{
-    transform:scale(1.05);
+
+transform:scale(1.05);
+box-shadow:0 0 15px rgba(255,255,255,.8);
+
 }
-.content{
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    transform: rotate(45deg);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 40px;
-    box-sizing: border-box;
-    z-index: 1;
+
+@keyframes beat{
+
+0%,100%{
+transform:scale(1);
+}
+
+50%{
+transform:scale(1.05);
+}
+
 }

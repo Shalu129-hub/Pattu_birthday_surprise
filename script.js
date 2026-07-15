@@ -1,5 +1,5 @@
-const startBtn = document.getElementById("startBtn");
+document.getElementById("startBtn").addEventListener("click",function(){
 
-startBtn.addEventListener("click", function () {
-    alert("🎉 Welcome Pattu! Let's begin your birthday surprise ❤️");
+alert("❤️ பயணம் இப்போது தான் தொடங்குகிறது... ❤️");
+
 });
