@@ -117,55 +117,7 @@ Next ❤️
 
 </div>
 
-<script>
-
-const questions=[
-
-"😊 Are you happy with me?",
-
-"❤️ When did you realize you were in love with me?",
-
-"💍 What is one thing you are expecting to build our relationship to the next level?"
-
-];
-
-let current=0;
-
-showQuestion();
-
-function showQuestion(){
-
-document.getElementById("question").innerHTML=questions[current];
-
-document.getElementById("progress").innerHTML=
-"Question "+(current+1)+" of "+questions.length;
-
-}
-
-function nextQuestion(){
-
-const answer=document.getElementById("answer").value;
-
-localStorage.setItem("Question"+(current+1),answer);
-
-current++;
-
-if(current<questions.length){
-
-document.getElementById("answer").value="";
-
-showQuestion();
-
-}
-else{
-
-window.location.href="video.html";
-
-}
-
-}
-
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
