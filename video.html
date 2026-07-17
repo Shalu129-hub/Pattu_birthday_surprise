@@ -37,6 +37,10 @@ video{width:100%;height:100%;object-fit:cover;display:block}
 .controls .left, .controls .right{display:flex;gap:8px;align-items:center}
 .btn{background:rgba(255,255,255,0.06);backdrop-filter:blur(4px);border-radius:10px;padding:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;border:1px solid rgba(255,255,255,0.06);cursor:pointer}
 .btn:active{transform:scale(.98)}
+/* pre-popup love buttons */
+/* highlighted selection style */
+#prePopup .btn[data-love]{background:rgba(0,0,0,0.04);color:#333;border-color:rgba(0,0,0,0.06)}
+#prePopup .btn[data-love].selected{background:linear-gradient(135deg,#ff9a9e,#ffd1dc);box-shadow:0 8px 20px rgba(255,122,162,0.18);transform:scale(1.04)}
 .play-big{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;background:linear-gradient(135deg,#ff7aa2,#ffb86c);width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.4);cursor:pointer}
 .play-big svg{width:36px;height:36px}
 
@@ -48,9 +52,18 @@ video{width:100%;height:100%;object-fit:cover;display:block}
 
 /* Floating effects containers */
 .effects{position:absolute;inset:0;pointer-events:none;z-index:6}
-.glitter-container{position:absolute;inset:0;overflow:hidden;z-index:1}
+.glitter-container{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
+.glitter-container.paused .float-item{animation-play-state:paused;opacity:0.6}
+.effects.paused .float-item{animation-play-state:paused;opacity:0.6}
+.paused .float-item{animation-play-state:paused;opacity:0.6}
+.paused .burst-heart{animation-play-state:paused}
+.glitter-block{position:absolute;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));}
 .float-item{position:absolute;opacity:0;animation:fall linear infinite}
 @keyframes fall{0%{transform:translateY(-10vh) rotate(0deg);opacity:0}10%{opacity:1}100%{transform:translateY(120vh) rotate(360deg);opacity:0}}
+
+/* burst hearts when liking */
+.burst-heart{position:absolute;width:12px;height:12px;border-radius:50%;pointer-events:none;z-index:30;transform-origin:center;opacity:0}
+@keyframes riseFade{0%{transform:translateY(0) scale(1);opacity:1}70%{opacity:1}100%{transform:translateY(-120px) scale(.6);opacity:0}}
 
 /* Double-tap heart */
 .double-heart{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);opacity:0;z-index:7;pointer-events:none;transition:transform .35s ease,opacity .35s}
@@ -62,6 +75,11 @@ video{width:100%;height:100%;object-fit:cover;display:block}
 /* Responsive tweaks */
 @media(min-width:900px){.reel{width:420px;height:760px}}
 @media(max-width:420px){body{padding:12px}.reel{width:100%;height:88vh;border-radius:20px}}
+
+/* Fullscreen tweaks */
+.reel.is-fullscreen{width:100vw;height:100vh;border-radius:0;padding:12px}
+.reel.is-fullscreen .video-wrapper{height:78%}
+.reel.is-fullscreen video{object-fit:contain}
 
 /* Small decorative elements */
 .gift,.petal,.floating-heart{width:28px;height:28px}
@@ -75,6 +93,7 @@ video{width:100%;height:100%;object-fit:cover;display:block}
 <div class="reel" id="reel">
 
     <div class="glitter-container" id="glitterContainer"></div>
+    <div class="glitter-block" id="glitterBlock" aria-hidden="true"></div>
 
     <div class="top-info">
         <div class="title">🎂 Happy Birthday, Pattu ❤️</div>
@@ -154,6 +173,19 @@ const startVideoBtn = document.getElementById('startVideoBtn');
 const glitterContainer = document.getElementById('glitterContainer');
 const floatingArea = document.getElementById('floatingArea');
 
+// Pre-popup selection buttons
+const loveButtons = document.querySelectorAll('#prePopup .btn[data-love]');
+let selectedLove = null;
+loveButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        loveButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedLove = btn.dataset.love;
+        startVideoBtn.textContent = `Start Video ▶️ (${selectedLove})`;
+        createFloating('heart');
+    });
+});
+
 // Start popup interactions
 prePopup.addEventListener('click', (e)=>{
     if(e.target.dataset && e.target.dataset.love){
@@ -195,7 +227,7 @@ fsBtn.addEventListener('click', ()=>{ if(document.fullscreenElement){document.ex
 document.addEventListener('keydown', (e)=>{ if(e.code==='Space'){e.preventDefault(); togglePlay()} });
 
 // Like animation
-likeBtn.addEventListener('click', ()=>{popHeart(likeBtn);});
+likeBtn.addEventListener('click', ()=>{ popHeart(likeBtn); burstHearts(likeBtn,3000); });
 
 function popHeart(target){
     const rect = target.getBoundingClientRect();
@@ -238,6 +270,24 @@ for(let i=0;i<80;i++){
     glitterContainer.appendChild(g);
 }
 
+// Position a blocker over the video to keep glitter behind the video
+const glitterBlock = document.getElementById('glitterBlock');
+function updateGlitterBlock(){
+    const reel = document.getElementById('reel');
+    const videoWrap = document.getElementById('videoWrapper');
+    const rRect = reel.getBoundingClientRect();
+    const vRect = videoWrap.getBoundingClientRect();
+    const left = vRect.left - rRect.left;
+    const top = vRect.top - rRect.top;
+    glitterBlock.style.left = left + 'px';
+    glitterBlock.style.top = top + 'px';
+    glitterBlock.style.width = vRect.width + 'px';
+    glitterBlock.style.height = vRect.height + 'px';
+}
+window.addEventListener('resize', updateGlitterBlock);
+window.addEventListener('load', updateGlitterBlock);
+setTimeout(updateGlitterBlock,300);
+
 // Floating hearts, gifts, petals
 function createFloating(type){
     const el = document.createElement('div'); el.className='float-item';
@@ -257,6 +307,30 @@ function createFloating(type){
 // periodically float items
 setInterval(()=>{ const r = Math.random(); if(r<0.45)createFloating('heart'); else if(r<0.7)createFloating('gift'); else createFloating('petal'); },700);
 
+// burst small hearts from an element for given duration (ms)
+function burstHearts(targetElem, duration=3000){
+    const rect = targetElem.getBoundingClientRect();
+    const container = document.body;
+    const end = Date.now() + duration;
+    const interval = setInterval(()=>{
+        const now = Date.now();
+        if(now > end){ clearInterval(interval); return; }
+        // create 4 small hearts per tick
+        for(let i=0;i<4;i++){
+            const h = document.createElement('div'); h.className='burst-heart';
+            const color = ['#ff6b81','#ff9f1c','#ff6b81','#ffd166'][Math.floor(Math.random()*4)];
+            h.style.background = color;
+            const x = rect.left + rect.width/2 + (Math.random()*60-30);
+            const y = rect.top + rect.height/2 + (Math.random()*20-10);
+            h.style.left = x + 'px'; h.style.top = y + 'px';
+            const dur = 900 + Math.random()*600;
+            h.style.animation = `riseFade ${dur}ms cubic-bezier(.2,.8,.2,1)`;
+            container.appendChild(h);
+            setTimeout(()=>{ h.remove(); }, dur+80);
+        }
+    },120);
+}
+
 // Confetti on end and redirect
 video.addEventListener('ended', ()=>{
     // small confetti: create colorful divs
@@ -273,6 +347,28 @@ video.addEventListener('play', updatePlayIcon); video.addEventListener('pause', 
 
 // Initial state: pause until user starts (required on many mobile browsers)
 video.pause();
+
+// Pause/resume glitter when video pauses/plays
+video.addEventListener('pause', ()=>{
+    glitterContainer.classList.add('paused');
+    // pause floating effects (hearts/gifts/petals) too
+    document.querySelectorAll('.effects, #floatingArea').forEach(el=>el.classList.add('paused'));
+});
+video.addEventListener('play', ()=>{
+    glitterContainer.classList.remove('paused');
+    document.querySelectorAll('.effects, #floatingArea').forEach(el=>el.classList.remove('paused'));
+});
+
+// Fullscreen handling: fit reel and update blocker
+document.addEventListener('fullscreenchange', ()=>{
+    const reel = document.getElementById('reel');
+    if(document.fullscreenElement === reel){
+        reel.classList.add('is-fullscreen');
+    } else {
+        reel.classList.remove('is-fullscreen');
+    }
+    setTimeout(updateGlitterBlock,120);
+});
 
 // expose rewind/forward with keyboard arrows
 document.addEventListener('keydown', (e)=>{ if(e.key==='ArrowLeft')rewindBtn.click(); if(e.key==='ArrowRight')forwardBtn.click(); });
