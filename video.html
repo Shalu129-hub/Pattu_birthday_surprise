@@ -72,7 +72,18 @@ video{width:100%;height:100%;object-fit:cover;display:block}
 /* Footer */
 .footer{color:#fff;text-align:center;margin-top:12px;font-size:14px;z-index:5}
 
-/* Responsive tweaks */
+/* End dialog overlay */
+.popup-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.72);backdrop-filter:blur(2px);z-index:50;visibility:hidden;opacity:0;transition:opacity .2s ease,visibility .2s ease}
+.popup-overlay.show{visibility:visible;opacity:1}
+.popup-card{background:rgba(255,255,255,.98);border-radius:24px;max-width:420px;width:90%;padding:24px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.25);}
+.popup-card h2{font-size:1.4rem;color:#222;margin-bottom:10px;}
+.popup-card p{color:#444;font-size:1rem;line-height:1.5;margin-bottom:22px;}
+.popup-card .btn{width:100%;font-size:1rem;padding:12px 18px;background:linear-gradient(135deg,#ff7aa2,#ffb86c);border:none;color:#fff;}
+
+/* Cracker sparkle overlay */
+.cracker-overlay{position:fixed;inset:0;pointer-events:none;z-index:45;overflow:hidden}
+.cracker-piece{position:absolute;width:4px;height:12px;border-radius:3px;opacity:0;transform-origin:center;animation:cracker-fall linear forwards}
+@keyframes cracker-fall{0%{opacity:1;transform:translateY(0) scale(1) rotate(0deg)}40%{opacity:1}100%{opacity:0;transform:translateY(120vh) scale(.2) rotate(720deg)}}
 @media(min-width:900px){.reel{width:420px;height:760px}}
 @media(max-width:420px){body{padding:12px}.reel{width:100%;height:88vh;border-radius:20px}}
 
@@ -156,6 +167,15 @@ video{width:100%;height:100%;object-fit:cover;display:block}
     </div>
 </div>
 
+<div id="endPopup" class="popup-overlay" role="dialog" aria-modal="true" aria-labelledby="endPopupTitle">
+    <div class="popup-card">
+        <h2 id="endPopupTitle">Hope you loved it!</h2>
+        <p>One last small note, then enjoy a magical surprise... ✨</p>
+        <button id="endConfirmBtn" class="btn">OK</button>
+    </div>
+</div>
+<div id="crackerOverlay" class="cracker-overlay" aria-hidden="true"></div>
+
 <script>
 // Elements
 const video = document.getElementById('birthdayVideo');
@@ -176,6 +196,11 @@ const floatingArea = document.getElementById('floatingArea');
 // Pre-popup selection buttons
 const loveButtons = document.querySelectorAll('#prePopup .btn[data-love]');
 let selectedLove = null;
+const endPopup = document.getElementById('endPopup');
+const endConfirmBtn = document.getElementById('endConfirmBtn');
+const crackerOverlay = document.getElementById('crackerOverlay');
+let crackersActive = false;
+
 loveButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
         loveButtons.forEach(b => b.classList.remove('selected'));
@@ -196,6 +221,41 @@ prePopup.addEventListener('click', (e)=>{
 startVideoBtn.addEventListener('click', ()=>{
     prePopup.style.display='none';
     safePlay();
+});
+
+function showEndPopup(){
+    endPopup.classList.add('show');
+}
+function hideEndPopup(){
+    endPopup.classList.remove('show');
+}
+function startCrackers(){
+    if(crackersActive) return;
+    crackersActive = true;
+    const colors = ['#ff3d5a','#ffd166','#44d7b6','#5f6cff','#ff9f1c','#ff61a6'];
+    const count = 120;
+    for(let i=0;i<count;i++){
+        const piece = document.createElement('div');
+        piece.className='cracker-piece';
+        const size = 4 + Math.random()*6;
+        piece.style.width = size+'px';
+        piece.style.height = 10 + Math.random()*12+'px';
+        piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+        piece.style.left = Math.random()*100+'%';
+        piece.style.top = (Math.random()*20 - 10)+'%';
+        piece.style.opacity = 0;
+        piece.style.animationDuration = 1800 + Math.random()*900 + 'ms';
+        piece.style.animationDelay = Math.random()*300 + 'ms';
+        piece.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
+        crackerOverlay.appendChild(piece);
+        setTimeout(()=>piece.remove(), 2500);
+    }
+    setTimeout(()=>{ crackersActive=false; }, 2600);
+}
+
+endConfirmBtn.addEventListener('click', ()=>{
+    hideEndPopup();
+    window.location.href = 'final.html';
 });
 
 function safePlay(){
@@ -331,15 +391,14 @@ function burstHearts(targetElem, duration=3000){
     },120);
 }
 
-// Confetti on end and redirect
+// Show final note popup when video ends
 video.addEventListener('ended', ()=>{
     // small confetti: create colorful divs
     for(let i=0;i<80;i++){
         const c = document.createElement('div'); c.style.position='fixed'; c.style.left=(50+Math.random()*60-30)+'%'; c.style.top=(20+Math.random()*40)+'%'; c.style.width='8px'; c.style.height='12px'; c.style.background=['#ff6b6b','#ffd166','#6bcB77','#4d96ff','#ff9f1c'][Math.floor(Math.random()*5)]; c.style.transform='rotate('+Math.random()*360+'deg)'; c.style.zIndex=40; document.body.appendChild(c);
         setTimeout(()=>c.remove(),2500);
     }
-    // show brief message then redirect
-    setTimeout(()=>{ window.location.href='final.html' },1800);
+    setTimeout(()=>{ showEndPopup(); },1800);
 });
 
 // small helper to keep controls state in sync

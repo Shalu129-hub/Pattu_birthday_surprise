@@ -68,6 +68,42 @@ p{
 
 }
 
+.sparkle-overlay{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:20;
+}
+.sparkle-piece{
+    position:absolute;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    opacity:0;
+    filter:drop-shadow(0 0 10px rgba(255,255,255,0.9));
+    animation:cracker-sparkle 1.6s ease-out forwards;
+}
+.heart-piece{
+    position:absolute;
+    font-size:16px;
+    line-height:1;
+    pointer-events:none;
+    opacity:0;
+    animation:heart-burst 1.8s ease-out forwards;
+}
+@keyframes cracker-sparkle{
+    0%{opacity:0;transform:scale(0.2) translateY(0) rotate(0deg);}
+    15%{opacity:1;transform:scale(1.2) translateY(-18px) rotate(15deg);}
+    60%{opacity:1;transform:scale(0.8) translateY(-60px) rotate(45deg);}
+    100%{opacity:0;transform:scale(0.6) translateY(-140px) rotate(90deg);}
+}
+@keyframes heart-burst{
+    0%{opacity:0;transform:scale(0.4) translateY(0);}
+    20%{opacity:1;transform:scale(1.1) translateY(-20px);}
+    100%{opacity:0;transform:scale(0.7) translateY(-110px);}
+}
+
 </style>
 
 </head>
@@ -119,5 +155,34 @@ p{
 
 </div>
 
+</div>
+<div id="sparkleOverlay" class="sparkle-overlay" aria-hidden="true"></div>
+<script>
+window.addEventListener('load', ()=>{
+    const overlay = document.getElementById('sparkleOverlay');
+    const sparkleTimer = setInterval(()=>{
+        const sparkle = document.createElement('div');
+        const type = Math.random() < 0.3 ? 'heart' : 'sparkle';
+        if(type === 'heart'){
+            sparkle.className = 'heart-piece';
+            sparkle.innerText = '❤️';
+            sparkle.style.fontSize = `${10 + Math.random()*16}px`;
+        } else {
+            sparkle.className = 'sparkle-piece';
+            const size = 4 + Math.random()*8;
+            sparkle.style.width = size + 'px';
+            sparkle.style.height = size + 'px';
+            sparkle.style.background = `rgba(255,${220 + Math.random()*35},${220 + Math.random()*35},${0.9 + Math.random()*0.1})`;
+        }
+        sparkle.style.left = Math.random()*100 + '%';
+        sparkle.style.top = 25 + Math.random()*55 + '%';
+        sparkle.style.animationDuration = (1.4 + Math.random()*0.8) + 's';
+        sparkle.style.animationDelay = '0s';
+        overlay.appendChild(sparkle);
+        sparkle.addEventListener('animationend', ()=> sparkle.remove());
+    }, 120);
+    setTimeout(()=> clearInterval(sparkleTimer), 180000);
+});
+</script>
 </body>
 </html>
