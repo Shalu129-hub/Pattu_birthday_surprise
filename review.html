@@ -18,6 +18,13 @@ button.submit{width:100%;background:#e91e63;color:#fff;border:none;padding:16px 
 button.submit:hover{transform:translateY(-2px);}
 .message{margin-top:18px;font-size:16px;text-align:center;color:#444;}
 .thank-you{margin-top:18px;padding:16px 18px;border-radius:20px;background:#fff0f6;color:#c2185b;font-size:17px;text-align:center;}
+.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease;}
+.popup-overlay.show{opacity:1;visibility:visible;}
+.popup-card{background:#fff;padding:28px 26px;border-radius:24px;max-width:90%;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.22);position:relative;}
+.popup-card p{font-size:20px;color:#d81b60;margin-bottom:20px;}
+.popup-card button{background:#e91e63;color:#fff;border:none;padding:12px 28px;border-radius:22px;cursor:pointer;font-size:16px;}
+.popup-spark{position:absolute;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle, rgba(255,236,141,1) 0%, rgba(255,167,38,1) 60%, rgba(255,138,101,0.9) 100%);box-shadow:0 0 18px rgba(255,196,0,0.9);opacity:0;animation:popup-spark 1s ease-out forwards;}
+@keyframes popup-spark{0%{opacity:1;transform:translate(0,0) scale(1);}50%{opacity:1;transform:translate(var(--dx),var(--dy)) scale(1.4);}100%{opacity:0;transform:translate(calc(var(--dx)*1.5),calc(var(--dy)*1.5)) scale(0.2);}
 </style>
 </head>
 <body>
@@ -36,12 +43,20 @@ button.submit:hover{transform:translateY(-2px);}
   <p class="message" id="reviewMessage"></p>
   <div id="thankYouNote" class="thank-you" style="display:none;">மிக நன்றி! உங்கள் ஆர்வம் என் இதயத்தைக் குதூகலமாக மாற்றியது.</div>
 </div>
+<div id="feedbackPopup" class="popup-overlay" aria-hidden="true">
+  <div class="popup-card">
+    <p>Thanks for the review. I love you so much.</p>
+    <button id="closePopup" type="button">Close</button>
+  </div>
+</div>
 <script>
 const starButtons = document.querySelectorAll('.rating-stars button');
 const reviewText = document.getElementById('reviewText');
 const submitButton = document.getElementById('submitReview');
 const reviewMessage = document.getElementById('reviewMessage');
 const thankYouNote = document.getElementById('thankYouNote');
+const feedbackPopup = document.getElementById('feedbackPopup');
+const closePopup = document.getElementById('closePopup');
 let selectedRating = 0;
 
 starButtons.forEach(button => {
@@ -68,7 +83,56 @@ submitButton.addEventListener('click', () => {
   starButtons.forEach(btn => btn.disabled = true);
   reviewText.disabled = true;
   thankYouNote.style.display = 'block';
+  feedbackPopup.classList.add('show');
+  playCrackerSound();
+  launchPopupSparks();
 });
+
+closePopup.addEventListener('click', () => {
+  feedbackPopup.classList.remove('show');
+});
+
+function playCrackerSound() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return;
+  const ctx = new AudioContext();
+  const bufferSize = 4096;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    const noise = Math.random() * 2 - 1;
+    const envelope = 1 - i / bufferSize;
+    data[i] = noise * envelope * 0.5;
+  }
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+  source.connect(gain).connect(ctx.destination);
+  source.start();
+  source.stop(ctx.currentTime + 0.25);
+}
+
+function launchPopupSparks() {
+  const overlay = document.getElementById('feedbackPopup');
+  if (!overlay) return;
+  const width = overlay.clientWidth;
+  const height = overlay.clientHeight;
+  for (let i = 0; i < 32; i++) {
+    const spark = document.createElement('div');
+    spark.className = 'popup-spark';
+    const dx = (Math.random() - 0.5) * (width * 0.6) + 'px';
+    const dy = (Math.random() - 0.5) * (height * 0.6) + 'px';
+    spark.style.setProperty('--dx', dx);
+    spark.style.setProperty('--dy', dy);
+    spark.style.left = `calc(50% + ${Math.random() * 60 - 30}px)`;
+    spark.style.top = `calc(50% + ${Math.random() * 60 - 30}px)`;
+    overlay.appendChild(spark);
+    spark.addEventListener('animationend', () => spark.remove());
+  }
+}
 </script>
 </body>
 </html>
