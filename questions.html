@@ -109,11 +109,17 @@ placeholder="Type your answer here..."></textarea>
 
 <br>
 
-<button onclick="nextQuestion()">
+<button id="nextBtn" onclick="nextQuestion()">
 Next ❤️
 </button>
 
 <p id="progress" class="progress"></p>
+
+<div id="summary" style="display:none; margin-top:32px; text-align:left;">
+    <h2 style="color:#e91e63; margin-bottom:18px;">Your answers so far</h2>
+    <div id="summaryList" style="display:flex;flex-direction:column;gap:16px"></div>
+    <button id="goVideoBtn" style="margin-top:24px;">Watch the surprise video</button>
+</div>
 
 </div>
 

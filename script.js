@@ -1,109 +1,93 @@
-// ==========================================
-// Birthday Surprise Website - script.js
-// ==========================================
+const startBtn = document.getElementById('startBtn');
+if (startBtn) {
+    startBtn.addEventListener('click', () => {
+        window.location.href = 'questions.html';
+    });
+}
 
-document.addEventListener("DOMContentLoaded", function () {
+const questionEl = document.getElementById('question');
+if (questionEl) {
+    const questions = [
+        'When did you first realize I mean a lot to you?',
+        'What is your favorite memory with me so far?',
+        'What are you most excited to do with me next?',
+        'What makes our bond special to you?',
+        'One sweet wish you want to share with me today?'
+    ];
 
-    // ==========================
-    // Welcome Page
-    // ==========================
+    let currentQuestion = 0;
+    const answers = [];
+    const answerEl = document.getElementById('answer');
+    const progressEl = document.getElementById('progress');
+    const summaryEl = document.getElementById('summary');
+    const summaryList = document.getElementById('summaryList');
+    const nextBtn = document.getElementById('nextBtn');
+    const goVideoBtn = document.getElementById('goVideoBtn');
 
-    const startBtn = document.getElementById("startBtn");
-
-    if (startBtn) {
-
-        startBtn.addEventListener("click", function () {
-
-            startBtn.innerHTML = "💖 Loading...";
-
-            setTimeout(function () {
-
-                window.location.href = "questions.html";
-
-            }, 800);
-
-        });
-
+    function updateQuestion() {
+        questionEl.textContent = questions[currentQuestion];
+        progressEl.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+        answerEl.focus();
     }
 
-    // ==========================
-    // Questions Page
-    // ==========================
+    function showSummary() {
+        questionEl.style.display = 'none';
+        answerEl.style.display = 'none';
+        nextBtn.style.display = 'none';
+        progressEl.style.display = 'none';
+        summaryList.innerHTML = '';
 
-    const question = document.getElementById("question");
+        questions.forEach((question, index) => {
+            const item = document.createElement('div');
+            item.style.padding = '18px';
+            item.style.border = '1px solid #ffe3f0';
+            item.style.borderRadius = '18px';
+            item.style.background = '#fff3f8';
 
-    if (question) {
+            const q = document.createElement('div');
+            q.textContent = question;
+            q.style.color = '#c2185b';
+            q.style.fontWeight = '700';
+            q.style.marginBottom = '8px';
 
-        const questions = [
+            const a = document.createElement('div');
+            a.textContent = answers[index] || 'No answer provided.';
+            a.style.color = '#444';
+            a.style.lineHeight = '1.6';
 
-            "😊 Are you happy with me?",
+            item.appendChild(q);
+            item.appendChild(a);
+            summaryList.appendChild(item);
+        });
 
-            "❤️ When did you realize you were in love with me?",
+        summaryEl.style.display = 'block';
+    }
 
-            "💍 What is the one thing you are expecting to build our relationship to the next level?"
-
-        ];
-
-        let currentQuestion = 0;
-
-        showQuestion();
-
-        function showQuestion() {
-
-            document.getElementById("question").innerHTML = questions[currentQuestion];
-
-            document.getElementById("progress").innerHTML =
-                "Question " + (currentQuestion + 1) + " of " + questions.length;
-
+    function nextQuestion() {
+        const answer = answerEl.value.trim();
+        if (!answer) {
+            alert('Please type your answer before continuing.');
+            return;
         }
 
-        window.nextQuestion = function () {
+        answers.push(answer);
+        answerEl.value = '';
+        currentQuestion += 1;
 
-            const answer = document.getElementById("answer").value.trim();
-
-            if (answer === "") {
-
-                alert("❤️ Please answer this question before continuing.");
-
-                return;
-
-            }
-
-            localStorage.setItem("Question" + (currentQuestion + 1), answer);
-
-            currentQuestion++;
-
-            if (currentQuestion < questions.length) {
-
-                document.getElementById("answer").value = "";
-
-                showQuestion();
-
-            }
-            else {
-
-                window.location.href = "video.html";
-
-            }
-
-        };
-
+        if (currentQuestion >= questions.length) {
+            showSummary();
+        } else {
+            updateQuestion();
+        }
     }
 
-    // ==========================
-    // Video Page
-    // ==========================
+    window.nextQuestion = nextQuestion;
 
-    const birthdayVideo = document.getElementById("birthdayVideo");
-
-    if (birthdayVideo) {
-
-        birthdayVideo.addEventListener("ended", function () {
-
-            window.location.href = "final.html";
-
+    if (goVideoBtn) {
+        goVideoBtn.addEventListener('click', () => {
+            window.location.href = 'video.html';
         });
-
     }
 
-});
+    updateQuestion();
+}

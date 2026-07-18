@@ -15,17 +15,17 @@
 }
 
 body{
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+    min-height:100vh;
+    height:auto;
+    padding:40px 0;
     background:linear-gradient(135deg,#ffd6e8,#ffeef5);
     font-family:'Segoe UI',sans-serif;
 }
 
 .card{
 
-    width:750px;
+    width:clamp(320px,80vw,750px);
+    margin:0 auto;
     background:white;
     padding:50px;
     border-radius:25px;
@@ -74,6 +74,26 @@ p{
     pointer-events:none;
     overflow:hidden;
     z-index:20;
+}
+.scroll-notice{
+    position:fixed;
+    bottom:18px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(255,255,255,0.95);
+    color:#b71c46;
+    border:1px solid #ffacc9;
+    border-radius:28px;
+    padding:14px 22px;
+    box-shadow:0 8px 30px rgba(183,28,70,0.18);
+    cursor:pointer;
+    font-size:16px;
+    text-align:center;
+    display:none;
+    z-index:30;
+}
+.scroll-notice.show{
+    display:block;
 }
 .sparkle-piece{
     position:absolute;
@@ -154,8 +174,7 @@ p{
 </div>
 
 </div>
-
-</div>
+<div id="scrollNotice" class="scroll-notice" role="button" tabindex="0">✨ Scroll finished? Tap here for a sweet romantic surprise. ✨</div>
 <div id="sparkleOverlay" class="sparkle-overlay" aria-hidden="true"></div>
 <script>
 window.addEventListener('load', ()=>{
@@ -183,6 +202,41 @@ window.addEventListener('load', ()=>{
     }, 120);
     setTimeout(()=> clearInterval(sparkleTimer), 180000);
 });
+
+const scrollNotice = document.getElementById('scrollNotice');
+let scrollNoticeShown = false;
+const showScrollNotice = () => {
+    if (!scrollNotice || scrollNoticeShown) return;
+    scrollNoticeShown = true;
+    scrollNotice.classList.add('show');
+};
+
+window.addEventListener('scroll', () => {
+    if (!scrollNotice) return;
+    if (window.scrollY > 50) {
+        showScrollNotice();
+    }
+});
+
+setTimeout(() => {
+    if (!scrollNoticeShown) {
+        showScrollNotice();
+    }
+}, 3000);
+
+const revealReviewPage = () => {
+    window.location.href = 'review.html';
+};
+
+if (scrollNotice) {
+    scrollNotice.addEventListener('click', revealReviewPage);
+    scrollNotice.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            revealReviewPage();
+        }
+    });
+}
 </script>
 </body>
 </html>
