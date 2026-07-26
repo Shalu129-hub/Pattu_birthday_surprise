@@ -291,12 +291,14 @@ likeBtn.addEventListener('click', ()=>{ popHeart(likeBtn); burstHearts(likeBtn,3
 
 function popHeart(target){
     const rect = target.getBoundingClientRect();
+    const container = document.getElementById('reel') || document.body;
+    const containerRect = container.getBoundingClientRect();
     const heart = document.createElement('div');
     heart.className='heart-pop';
     heart.innerHTML = '<svg width="48" height="48" viewBox="0 0 24 24"><path fill="#ff2d55" d="M12 21s-7-4.35-9-7.5C0 9.5 3 6 6 6c1.8 0 3.1 1.1 4 2 0.9-0.9 2.2-2 4-2 3 0 6 3.5 3 7.5C19 16.65 12 21 12 21z"/></svg>';
-    document.body.appendChild(heart);
-    heart.style.left = (rect.left + rect.width/2) + 'px';
-    heart.style.top = (rect.top + rect.height/2) + 'px';
+    container.appendChild(heart);
+    heart.style.left = (rect.left - containerRect.left + rect.width/2) + 'px';
+    heart.style.top = (rect.top - containerRect.top + rect.height/2) + 'px';
     heart.style.transition = 'transform .9s ease,opacity .9s';
     requestAnimationFrame(()=>{ heart.style.transform='translate(-50%,-150%) scale(1.4)'; heart.style.opacity='1'});
     setTimeout(()=>heart.style.opacity='0',900);
@@ -370,7 +372,8 @@ setInterval(()=>{ const r = Math.random(); if(r<0.45)createFloating('heart'); el
 // burst small hearts from an element for given duration (ms)
 function burstHearts(targetElem, duration=3000){
     const rect = targetElem.getBoundingClientRect();
-    const container = document.body;
+    const container = document.getElementById('reel') || document.body;
+    const containerRect = container.getBoundingClientRect();
     const end = Date.now() + duration;
     const interval = setInterval(()=>{
         const now = Date.now();
@@ -380,8 +383,8 @@ function burstHearts(targetElem, duration=3000){
             const h = document.createElement('div'); h.className='burst-heart';
             const color = ['#ff6b81','#ff9f1c','#ff6b81','#ffd166'][Math.floor(Math.random()*4)];
             h.style.background = color;
-            const x = rect.left + rect.width/2 + (Math.random()*60-30);
-            const y = rect.top + rect.height/2 + (Math.random()*20-10);
+            const x = rect.left - containerRect.left + rect.width/2 + (Math.random()*60-30);
+            const y = rect.top - containerRect.top + rect.height/2 + (Math.random()*20-10);
             h.style.left = x + 'px'; h.style.top = y + 'px';
             const dur = 900 + Math.random()*600;
             h.style.animation = `riseFade ${dur}ms cubic-bezier(.2,.8,.2,1)`;
