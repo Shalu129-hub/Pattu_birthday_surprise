@@ -224,7 +224,12 @@ startVideoBtn.addEventListener('click', ()=>{
 });
 
 function showEndPopup(){
-    endPopup.classList.add('show');
+    if (document.fullscreenElement) {
+        document.exitFullscreen().catch(()=>{});
+    }
+    setTimeout(() => {
+        endPopup.classList.add('show');
+    }, 220);
 }
 function hideEndPopup(){
     endPopup.classList.remove('show');
@@ -258,9 +263,19 @@ endConfirmBtn.addEventListener('click', ()=>{
     window.location.href = 'final.html';
 });
 
+function requestFullscreenIfPossible(){
+    const reel = document.getElementById('reel');
+    if (!reel) return;
+    if (document.fullscreenElement === reel) return;
+    if (reel.requestFullscreen) {
+        reel.requestFullscreen().catch(()=>{});
+    }
+}
+
 function safePlay(){
     video.play().catch(()=>{});
     updatePlayIcon();
+    requestFullscreenIfPossible();
 }
 
 // Controls
@@ -281,7 +296,14 @@ forwardBtn.addEventListener('click', ()=>{video.currentTime=Math.min(video.durat
 
 muteBtn.addEventListener('click', ()=>{video.muted=!video.muted; muteBtn.textContent = video.muted ? '🔇' : '🔊'});
 
-fsBtn.addEventListener('click', ()=>{ if(document.fullscreenElement){document.exitFullscreen()}else{document.getElementById('reel').requestFullscreen()}});
+fsBtn.addEventListener('click', ()=>{ 
+    const reel = document.getElementById('reel');
+    if(document.fullscreenElement){
+        document.exitFullscreen().catch(()=>{});
+    } else if(reel){
+        reel.requestFullscreen().catch(()=>{});
+    }
+});
 
 // Keyboard play/pause space
 document.addEventListener('keydown', (e)=>{ if(e.code==='Space'){e.preventDefault(); togglePlay()} });
